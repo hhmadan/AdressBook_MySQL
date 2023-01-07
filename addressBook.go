@@ -20,7 +20,7 @@ var db *sql.DB
 */
 func menu() {
 	var menuOption int
-	fmt.Printf("\n----CONTACT MENU----\n1.Add Contact\n2.Search By City OR State\n3.Display Contact List\n4.Exit\n")
+	fmt.Printf("\n----CONTACT MENU----\n1.Add Contact\n2.Search By City OR State\n3.Get Count Of Persons of City or State\n4.Display Contact List\n5.Exit\n")
 	fmt.Scanln(&menuOption)
 	switch menuOption {
 	case 1:
@@ -28,8 +28,10 @@ func menu() {
 	case 2:
 		searchByCityState()
 	case 3:
-		fmt.Println(readDataFromDB())
+		countByCityState()
 	case 4:
+		fmt.Println(readDataFromDB())
+	case 5:
 		//os.Exit(0)
 		return
 	default:
@@ -122,6 +124,29 @@ func searchByCityState() {
 			contacts = append(contacts, person)
 		}
 		fmt.Println("Available Contacts in State: ", contacts)
+	}
+}
+
+/*
+@ Getting count for Contacts available in given City or State
+*/
+func countByCityState() {
+	var inputCityStateName string
+
+	fmt.Println("Enter Name of City or State to get People count: ")
+	fmt.Scanln(&inputCityStateName)
+	rows, err := db.Query("SELECT COUNT(*) FROM contact WHERE city = ? or state = ?", inputCityStateName, inputCityStateName)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var city string
+		if err := rows.Scan(&city); err != nil {
+			panic(err.Error())
+		}
+		fmt.Printf("Found Person Count for given City: %s", city)
 	}
 }
 
