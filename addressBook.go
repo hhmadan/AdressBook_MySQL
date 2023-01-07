@@ -20,7 +20,7 @@ var db *sql.DB
 */
 func menu() {
 	var menuOption, id int
-	fmt.Printf("\n----CONTACT MENU----\n1.Add Contact\n2.Update Contact\n3.Search By City OR State\n4.Get Count Of Persons of City or State\n5.Display Contact List\n6.Exit\n")
+	fmt.Printf("\n----CONTACT MENU----\n1.Add Contact\n2.Update Contact\n3.Search By City OR State\n4.Get Count Of Persons of City or State\n5.Delete Contact\n6.Display Contact List\n7.Exit\n")
 	fmt.Scanln(&menuOption)
 	switch menuOption {
 	case 1:
@@ -34,8 +34,10 @@ func menu() {
 	case 4:
 		countByCityState()
 	case 5:
-		fmt.Println(readDataFromDB())
+		deleteContact()
 	case 6:
+		fmt.Println(readDataFromDB())
+	case 7:
 		//os.Exit(0)
 		return
 	default:
@@ -209,6 +211,24 @@ func updateContact(id int) {
 		id, _ := result.RowsAffected()
 		fmt.Printf("Successfully updated %v contact..!", id)
 	}
+}
+
+/*
+@ Delete existing contact from DataBase
+*/
+func deleteContact() {
+	var delete_id int
+	fmt.Println("Enter ID to Delete Permanently: ")
+	fmt.Scanln(&delete_id)
+
+	result, err := db.Exec("DELETE from Contact WHERE id = ?", delete_id)
+	if err != nil {
+		panic(err.Error())
+	}
+	id, err := result.RowsAffected()
+
+	fmt.Printf("Successfully Deleted %v Row..!", id)
+
 }
 
 /*
