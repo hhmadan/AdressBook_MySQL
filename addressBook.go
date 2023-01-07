@@ -20,14 +20,16 @@ var db *sql.DB
 */
 func menu() {
 	var menuOption int
-	fmt.Printf("\n----CONTACT MENU----\n1.Add Contact\n2.Display Contact List\n3.Exit")
+	fmt.Printf("\n----CONTACT MENU----\n1.Add Contact\n2.Search By City OR State\n3.Display Contact List\n4.Exit\n")
 	fmt.Scanln(&menuOption)
 	switch menuOption {
 	case 1:
 		addContact()
 	case 2:
-		fmt.Println(readDataFromDB())
+		searchByCityState()
 	case 3:
+		fmt.Println(readDataFromDB())
+	case 4:
 		//os.Exit(0)
 		return
 	default:
@@ -72,6 +74,55 @@ func addContact() (int64, error) {
 		return 0, fmt.Errorf("add person: %v", err)
 	}
 	return id, nil
+}
+
+/*
+@ retrieve data of contacts based on city and state
+*/
+func searchByCityState() {
+	var inputCityStateName string
+	var choice int
+	var contacts []Contact
+	fmt.Printf("1.Search by City\n2.Search by State\n")
+	fmt.Scanln(&choice)
+
+	if choice == 1 {
+		fmt.Println("Enter Name of City to search People: ")
+		fmt.Scanln(&inputCityStateName)
+
+		rows, err := db.Query("SELECT * FROM contact where city = ?", inputCityStateName)
+		//rows, err := db.Query("SELECT * FROM contact where city = ' " + inputCityStateName + " ';")
+		if err != nil {
+			panic(err.Error())
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var person Contact
+			if err := rows.Scan(&person.id, &person.FirstName, &person.LastName, &person.Address, &person.City, &person.State, &person.PhoneNumber, &person.Email); err != nil {
+				panic(err.Error())
+			}
+			contacts = append(contacts, person)
+		}
+		fmt.Println("Available Contacts in city: ", contacts)
+	} else {
+		fmt.Println("Enter Name of State to search People: ")
+		fmt.Scanln(&inputCityStateName)
+
+		rows, err := db.Query("SELECT * FROM contact where state = ?", inputCityStateName)
+		if err != nil {
+			panic(err.Error())
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var person Contact
+			if err := rows.Scan(&person.id, &person.FirstName, &person.LastName, &person.Address, &person.City, &person.State, &person.PhoneNumber, &person.Email); err != nil {
+				panic(err.Error())
+			}
+			contacts = append(contacts, person)
+		}
+		fmt.Println("Available Contacts in State: ", contacts)
+	}
 }
 
 /*
